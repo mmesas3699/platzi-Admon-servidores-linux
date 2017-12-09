@@ -1,0 +1,28 @@
+¿Por qué se usa linux en servidores?
+	
+	Es:
+		* Seguro
+		* Estable
+		* Totalmente personalizable
+		* Constantes actualizaciones
+		* Libre
+		* Gratis
+		* La comunidad
+		* Flexibilidad: es posible crear una distro de linux que se ajuste a nuestras necesidades.
+
+
+Configuración y guia básicas usando vitualbox
+
+	>> ifconfig 
+	# para mostrar las interfaces de red del equipo
+
+	-- Conectar por red el host con mi maquina virtual:
+		1. Abrir las configuraciones de la maquina virtual.
+		2. Ir a red.
+		3. En conectado a: Adaptador puente.
+		4. En el menu de virtualbox. Archivo - Preferencias - Red - Redes solo-anfitrión. 
+		5. Crear la red ''
+
+
+	# Este comando copia la llave publica de mi maquina local y la copia en el archivo de llaves autorizadas del sevidor
+	>> ssh-copy-id -i .ssh/id_rsa.pub user@ipdelservidor	
