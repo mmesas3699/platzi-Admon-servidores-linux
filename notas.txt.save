@@ -1,0 +1,65 @@
+¿Por qué se usa linux en servidores?
+	
+	Es:
+		* Seguro
+		* Estable
+		* Totalmente personalizable
+		* Constantes actualizaciones
+		* Libre
+		* Gratis
+		* La comunidad
+		* Flexibilidad: es posible crear una distro de linux que se ajuste a nuestras necesidades.
+
+
+Configuración y guia básicas usando vitualbox
+
+	>> ifconfig 
+	# para mostrar las interfaces de red del equipo
+
+	-- Conectar por red el host con mi maquina virtual:
+		1. Abrir las configuraciones de la maquina virtual.
+		2. Ir a red.
+		3. En conectado a: Adaptador puente.
+		4. En el menu de virtualbox. Archivo - Preferencias - Red - Redes solo-anfitrión. 
+		5. Crear la red ''
+
+
+	# Este comando copia la llave publica de mi maquina local y la copia en el archivo de llaves autorizadas del sevidor
+	>> ssh-copy-id -i .ssh/id_rsa.pub user@ipdelservidor	
+
+
+
+Iniciar un servidor Linux con AWS
+
+	Puerto 22: Es el que usa el servicio de SSH
+
+	>> ssh -i 'nombre de la llave.pem' usuario@ipdeldervidor
+	## de esta manera nos conectamos a un servidor AWS. El flag -i nos permite elegir la llave a utilizar
+
+
+
+Manejo de sesiones remotas con tmux y ssh
+
+	Crear un archivo 'config' en la carpeta .ssh/ . Este contiene la configuración de las llaves ssh que tenemos en el pc local.
+
+		La primera linea de la configuración es el nombre que le vamos a dar al Host.
+
+	Despues de tener listo el archivo:
+
+		>> ssh ServerPersonal # o el nombre que hayamos dado
+		## con esto nos conectamos al servidor sin usar la IP
+
+
+	Instalar tmux dentro del servidor
+		Para poder tener varias terminales dentro de la misma conexión 
+
+		>> sudo apt-get install tmux
+
+		>> tmux # para iniciar la aplicación
+
+		CTRL + B y 'c' abre una nueva terminal. c de create
+		CTRL + B y 'n' para movernos dentro de esas terminales. n de next
+		CTRL + B y 'd' para desconestarnos de la sesión 
+		>> tmux attach ## Para recuperar las sesiones que tenia abiertas en caso de desconección
+
+		
