@@ -26,3 +26,236 @@ Configuración y guia básicas usando vitualbox
 
 	# Este comando copia la llave publica de mi maquina local y la copia en el archivo de llaves autorizadas del sevidor
 	>> ssh-copy-id -i .ssh/id_rsa.pub user@ipdelservidor	
+
+
+
+Iniciar un servidor Linux con AWS
+
+	Puerto 22: Es el que usa el servicio de SSH
+
+	>> ssh -i 'nombre de la llave.pem' usuario@ipdeldervidor
+	## de esta manera nos conectamos a un servidor AWS. El flag -i nos permite elegir la llave a utilizar
+
+
+
+Manejo de sesiones remotas con tmux y ssh
+
+	Crear un archivo 'config' en la carpeta .ssh/ . Este contiene la configuración de las llaves ssh que tenemos en el pc local.
+
+		La primera linea de la configuración es el nombre que le vamos a dar al Host.
+
+	Despues de tener listo el archivo:
+
+		>> ssh ServerPersonal # o el nombre que hayamos dado
+		## con esto nos conectamos al servidor sin usar la IP
+
+
+	Instalar tmux dentro del servidor
+		Para poder tener varias terminales dentro de la misma conexión 
+
+		>> sudo apt-get install tmux
+
+		>> tmux # para iniciar la aplicación
+
+		CTRL + B y 'c' abre una nueva terminal. c de create
+		CTRL + B y 'n' para movernos dentro de esas terminales. n de next
+		CTRL + B y 'd' para desconestarnos de la sesión 
+		>> tmux attach ## Para recuperar las sesiones que tenia abiertas en caso de desconección
+
+
+
+Editores de texto en linux
+	
+	VI / VIM
+
+	Vim es un fork de Vi
+
+
+
+Editar archivos con VIM
+
+	>> vim [nombre del archivo]
+	
+	- Al dar el comando de arriba Vim crea un archivo y lo abre el modo de comandos. Para insertar texto presiono 'i'
+	- Para volver al modo comandos 'esc'
+	- 'v' modo visual para copiar texto,
+
+	Comandos para desplazarse por un archivo
+
+		h - Se desplaza un espacio a la izquierda.
+		l - Se desplaza un espacio a la derecha.
+		k - Se desplaza una línea hacía arriba.
+		j - Se desplaza una línea hacía abajo.
+
+	Comandos de inserción
+
+		a - Agrega texto después del cursor y entra al modo de inserción.
+		A - Agrega texto al final de la línea y entra al modo de inserción.
+		i - Inserta texto antes del cursor y entra al modo de inserción.
+		I - Inserta texto al inicio de la línea y entra al modo de inserción.
+		o - Abre una línea debajo del cursor y entra al modo de inserción.
+		O - Abre una línea encima del cursor y entra al modo de inserción.
+
+	Comandos de deshacer y reemplazar
+
+		u - Revierte la última modificación.
+		U - Revierte todas las modificaciones hechas en la línea actual
+	
+	Comandos para encontrar texto
+
+		/ - Buscar una cadena de caracteres a partir del cursor hacía el fin del archivo.
+		? - Buscar una cadena de caracteres a partir del cursor hacía el inicio del archivo.
+		n - Ir a la siguiente cadena que coincida con la que se busca en el archivo.
+	
+	Comandos para guardar y salir
+
+	:w - Guardar (salvar) el archivo.
+	:q! - Salir sin guardar.
+	:wq - Guardar todas las modificaciones y salir.
+
+
+
+Añadir y administrar repositorios
+
+	Los repositorios son una lista de paquetes, que pueden ser oficiales de la distribución.
+
+	En el archivo /etc/apt/source.list, se guardan las fuentes de los repositorios que va a consultar el sistema. Cada fuente contiene una URL, configuración y versión del paquete.
+
+	El comando apt-get update actualiza la informacion de las fuentes listadas en 'source.list'
+
+
+	>> apt-cache search keyring  ## para buscar los anillos de seguridad y versiones de los repositorios que se encuentran en el sistema.
+
+
+Instalar, actualizar y remover programas en linux
+
+	>> apt-get install [nombre del paquete]## para instalar paquetes
+
+	>> apt-get install aptitude ## Para instalar aptitude que es un manejador de paquetes
+	>> aptitude ## Para arrancar el programa
+
+		Dentro de aptitude '/', sirve para buscar paquetes
+
+		+ Para seleccionar el paquete a instalar o subir de versión.
+		- Para desinstalar
+		= Para dejarlo como estaba
+
+	* apt-get remove [nombre paquete] ## desinstala un paquete con seguridad, pero deja los archivos de configuración y bases de
+		 datos.
+
+	* apt-get purge [nombre paquete] ## borra todo.
+	  dpkg -P [nombre paquete]  ## igual que arriba
+
+
+
+Empaquetar y comprimir archivos en linux
+
+	* Empaquetar: Reunir varios archivos o directorios y unirlos en un solo.
+	* Comprimir: Reducir el tamaño de un archivo, generando una versión comprimida sin perder información.
+
+	*tar* es un programa que permite empaquetar.
+	*gzip* es un programa que permite comprimir.
+
+	# Empaquetar
+	>> tar cvf [ruta/nombre directorio].tar [ruta/nombre del directorio a empaquetar] > retorna cod.tar
+
+	# comprimir
+	>> gzip -9r [archivo a comprimir]  > retorna doc.tar.gz
+
+	# Empaqueta y comprime
+	>> tar cvfz archivo.tar.gz [carpeta a comprimir] 
+
+	# Descomprime y desempaqueta un archivo . C = Comprime X = extrae
+	>> tar xvfz archivo.tar.gz
+
+	- c --> para empaquetar
+    - x --> para desempaquetar
+    - zc --> empaqueta y comprime en gzip
+    - zx --> empaqueta y comprime en gzip
+    - jc --> empaqueta y comprime en bzip2
+    - jx --> empaqueta y comprime en bzip2
+    - Jc --> empaqueta y comprime en xz
+    - Jx --> empaqueta y comprime en xz
+
+
+   Tar mantiene permisos, usuario, grupo
+
+
+ Compilar un programa en linux
+
+ 	Proceso para compilar:
+ 		1. Instalar el asistente de compilación:
+ 			>> sudo apt-get install module-assistant
+
+		2. Preparar el sistema, instalando los paquetes requeridos:
+			>> sudo m-a prepare
+
+		3. Agregar fuente de datos habilitando fuentes deb-src:
+			>> sudo vim /etc/apt/source.list
+
+		4. Instalar dependencias del paquete
+			>> sudo apt-get biuld-dep [nombre del paquete]
+
+		5. Compilar
+			>> sudo apt-get source -b [nombre del paquete]
+
+
+
+Donde encontrar la documentación de los programas
+
+	Toda la documentación de los paquetes se encuentra en: /usr/share/doc
+
+	* Para ver el contenido de un archivo comprimido sin extraerlo: zless [nombre archivo]
+
+
+Gestores de paquetes en linux
+
+	Sistema de gestión de paquetes:
+		Es un conjunto de herramientas que permite la automatización de los procesos de instalación,
+		configuración, actualización y eliminación de paquetes de software. El termino gestor de paquetes
+		es comúnmente utilizado en los sistemas *NIX, especificamente en GNU/Linux, en el que la mayoria
+		de las distribuciones tiene su sistema gestor.
+
+	Sistema de repositorios de software
+		Son sitios centralizados donde esta la metadata, el código fuente y los binarios del software
+		disponible para instalar atravez del sistema de gestión de paquetes.
+
+
+	YUM (Yellowodg Updater, Modified) - Fedora, CentOS
+
+		Es una herramienta de código abierto desarrollada en python utilizada para hacer la instalación 
+		de paquetes de software en distribuciones que usan RPM (RPM Package manager) como formato de 
+		empaquetamiento, como Red Hat, Fedora, CentOS, Suse y Mandriva.
+
+		Algunos comandos YUM son:
+
+			* # para instalar software:
+				>>> yum install
+		
+			* # para desintalar:
+				>>> yum remove
+
+			* # para actualizar software
+				>>> yum update
+
+	APT (Advanced Packaging Tool) - Debian, Ubuntu y sus derivados
+
+		APT no es en sí un sistema gestor de paquetes directo al usuario sino un conjunto de librerías C++ que
+		utilizan otros programas para la distribución de paquetes de software como apt-get, apt-cache y aptitude.
+		APT se utiliza más que todo para la gestión de software que viene empaquetado en formato deb, utilizada en
+		sistemas Debian y derivados.
+
+		Algunos comandos de apt-get y aptitude son:
+
+		* # Para instalar un software:
+			>>> aptitude | apt-get install 
+
+		* # Para desinstalar un software:
+			>>> aptitude | apt-get remove 
+
+		* # Para actualizar un software:
+			>>> aptitude install "" paquete="">| apt-get  --only-upgrade install 
+
+		* # Para actualizar todo el sistema:
+			>>> aptitude safe-upgrade | apt-get upgrade
+
