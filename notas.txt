@@ -11,7 +11,7 @@
 		* Flexibilidad: es posible crear una distro de linux que se ajuste a nuestras necesidades.
 
 
-Configuración y guia básicas usando vitualbox
+Configuración y guia básicas usando virtualbox
 
 	>> ifconfig 
 	# para mostrar las interfaces de red del equipo
@@ -259,3 +259,219 @@ Gestores de paquetes en linux
 		* # Para actualizar todo el sistema:
 			>>> aptitude safe-upgrade | apt-get upgrade
 
+
+Estructura de archivos en linux
+
+	Todo en Linux son archivos o directorios.
+
+	* Directorios:
+		/			Directorio raíz
+		/home		Donde se almacenan los archivos de los usuarios
+		/lib 		Contiene las librerias del sistema (lib64: son para 64 bits)
+		/mnt 		Donde se montan las USB y CD o discos externos * tambien es /media
+		/opt 		Los programas de terceros que no tiene una estructura oficial dentro de la distribución (google, spotify)
+		/proc 		sistema de archivo virtual que lo crea y destruye el sistema. Contiene informacion del mismo. (forma anarquica)
+		/root		Cartera exclusiva para el administrador es un /home diferente para el usuario root
+		/sbin 		Binarios para el super usuario
+		/bin 		Binarios para el resto de usuarios
+		/tmp		Almacenamiento de archivos temporales
+		/usr 		Instalados los programas que estan por defecto
+		/var 		se utiliza para guardar archivos de logs, backups, servidor web
+		/var/log
+	>	/etc 		Archivos de configuración del sistema. Lo que no esta hay no esta en el sistema. Usuarios, permisos, Conf BD
+		/boot 		guarda los archivos del arranque del sistema.
+		/dev 		guarda las definiciones de todos los dispositivos.
+		/lost+found espacio temporal donde se guardan datos que se recuperan despues de la caida del sistema.
+		/media 		cuando montamos en el sistema dispositivos, los podemos ver en esta carpeta.
+		/run 		datos variables en tiempo de ejecucion. Informacion del sistema desde el ultimo booteo.
+		/srv 		archivos de datos especificos para cada servicio instalado en el sistema.
+		/sys 		evolucion de /proc pero localizado de forma jerarquica.
+
+
+Administración de discos y particiones en linux
+	
+	El disco que cree en DigitalOcean quedo /dev/sda/
+	La hacer la primera partición quedo /dev/sda1
+	La segunda partición quedo /dev/sda2
+
+
+	>> fdisk -l   ## Muestra el sistema de memorias y discos del equipo
+	>> fdisk /dev/[nuevo disco]  ## abre fdisk
+
+
+	Tipos de particiones
+		Existen dos tipos de tablas de particiones: ()
+			- La tradicional que permite 4 particiones primarias y muchas lógicas 
+			(las particiones lógicas sirven como contenedores para más particiones).
+
+			- gpt que permite tener muchas más particiones.
+
+	Crear partición
+		Ejecutamos fdisk /dev/xvd para ingresar al disco.
+		Creamos una nueva partición con n
+		Sí es la primera partición debemos crear una primaria, usamos el comando p
+		Seleccionamos el tamaño de la partición, diciendole +20G
+
+	Cambiar tipo de partición
+		Ejecutamos fdisk /dev/xvd para ingresar al disco.
+		Seleccionamos el número de la partición.
+		Seleccionamos t
+		Elegimos el número del tipo de partición.
+
+	Eliminar partición
+		Entramos a fdisk especificando el disco duro.
+		Usamos el comando d
+		Seleccionamos la partición.
+		Guardamos cambios con w
+
+	Guardar los cambios
+		Con w guardamos los cambios que realizamos, si salimos sin guardar la configuración que hacemos no se va a escribir
+		en el disco.
+		Ver tabla de particiones
+
+	Con el comando fdisk -l podemos ver cómo estan distribuidas las particiones.
+
+
+Formateo y montaje de particiones en Linux
+	
+	Existen muchos tipos de sistemas de archivos, cada uno tiene características que lo hacen útil para diferentes dispositivos.
+
+	Formatear particiones
+		El comando mkfs nos permite formatear una partición usando el sistema de archivos que queramos.
+
+		- Formato con FAT32: Podemos ejecutar el comando mkfs.vfat /dev/xvdf1 para formatear la partición xvdf1 con FAT32.
+		- Formato con EXT3: Podemos ejecutar el comadno mkfs.ext3 /dev/xvdf5 para formatear la partición xvdf5 con EXT3.
+		- Formato con EXT4: Podemos ejecutar el comadno mkfs.ext4 /dev/xvdf6 para formatear la partición xvdf6 con EXT4.
+		- Formato con XFS: Podemos ejecutar el comadno mkfs.xfs /dev/xvdf6 para formatear la partición xvdf6 con XFS.
+
+	Montar las particiones
+		Debemos crear un directorio por cada partición que deseamos montar, en este caso usamos tmp dentro de esta carpeta
+		podemos ejecutar:
+
+			>> mkdir xvdf1
+ 			>> mkdir xvdf3
+			>> mount /dev/xvdf1 /tmp/xvdf1
+			>> mount /dev/xvdf3 /tmp/xvdf3
+
+	Desmontar una partición
+		Para poder desmontar una partición, debes no estar sobre la partición. Puedes ejecutar el comando:
+			
+			>> umount /tmp/xvdf1
+			
+			En este caso /tmp/xvdf1 es donde tenemos montada la partición.
+
+	Listar puntos de montaje
+
+		El comando df -h nos lista los directorios que están montados y el espacio que tienen disponible.
+
+	Montar particiones automaticamente
+		Sí queremos montar las particiones de forma automatica podemos ir al archivo /etc/fstab, añadimos:
+			
+			/dev/xvdf3    /var_new    ext4    defaults,discard    0 0
+
+
+Administración swap en linux
+
+	Es útil para maquinas con poca RAM
+
+	>> free   ## Muestra el uso de RAM y Swap. free -m muestra el dato en megas
+
+	>> htop  ## Es como free pero más avanzado. No viene por defecto (apt-get install htop)
+
+	- Con el comando mkswap [nombre de la partición swap] formateamos la partición de tipo swap.
+	- Con el comando swapon [nombre de la partición swap] activo la partición swap.
+	- Con el comando swapoff [nombre de la partición swap] desactivo la partición swap.
+
+**********
+	https://joaquinaraujo.github.io/platzi_administracion-linux/
+
+	## Link con un super resumen
+
+**********
+
+Generar imagenes de discos duros
+	
+	>> sync ### para sincronizar los cambios del disco duro. Aveces los discos hacen cache
+
+	Crear imágenes con dd
+		dd nos permite sacar una imágen completa del disco duro, para realizar la imagen.
+		
+		Primero debemos estar seguros que tenemos la partición desmontada.
+		Usamos el comando:
+			>> dd if=/dev/xvdf6 of=/var_new/backup/backup_xvdf7 bs=1MB
+				# if es la partición que deseamos hacer la imágen, of donde se va a guardar la imágen.
+
+	Montar una imagen con loop
+		Primero debemos activar el módulo del kernel con >> modprobe loop.
+
+		Una vez activo, creamos una carpeta donde vamos a montar la imágen, con: (la imagen la bajo de internet con wget [url])
+			>> mkdir /tmp/iso_debian
+			## recuerda puedes seleccionar la ruta que desees.
+
+		Ahora con el comando:
+			>> mount debian.iso /tmp/iso_debian -o loop   ## estamos montando la imágen.
+
+	Recuerda debes estar seguro de la ruta del archivo, puedes ir autocompletando la ruta con tab
+
+	Escribir un archivo lleno de creamos
+
+		En linux existe una ruta /dev/zero esta siempre va a devolver cero.
+
+		Podemos crear el archivo con:
+		
+			>> dd if=/dev/zero of=zeros100M bs=1M c=100
+
+	Leer un archivo para medir la velocidad del disco
+
+		En Linux existe una ruta /dev/null la cual todo lo que enviemos va a desaparecer.
+
+		Podemos medir la velocidad de un disco leyendo un archivo, enviando la información a null con:
+			>> dd if=zeros100M of=/dev/null
+
+
+Administrar particiones GPT
+
+	Formas de arrancar el sistema:
+
+		- MBR: Es muy vieja que coloca 512 bytes al inicio del sector donde se inicia el sistema. La BIOS busca esos primeros 
+			512 bytes que son los que indican donde esta el kernel, la librerias y todo lo necesario para arrancar.
+
+		- UEFI: Buscar tener una capa de seguridad. Y permite buscar errores en los controladores del pc
+
+	GPT vs fdisk : Gpt permite hasta 128 particiones
+
+	Saber tipo de tabla de particiones
+		Con fdisk -l /dev/xvda, muestra el tipo de la tabla de partición.
+
+	Tabla de particiones GPT
+		GPT permite tener 128 particiones en un disco duro.
+		gdisk es un comando especial para particiones GPT.
+		
+		Crear particiones con gdisk
+			- Usamos el comando gdisk /dev/xvdh para acceder a configurar las particiones del disco.
+			Recuerda debes seleccionar el disco que deseas configurar.
+
+			- Usamos la opción n para crear una nueva, y seleccionamos el número de la partición.
+			- Asignamos el tamaño de la partición en este caso +1G
+			- Seleccionamos el tipo de partición, por ejemplo 8300 para cargar tipo Linux filesystem
+
+
+Administrar el arranque del sistema GRUB
+	
+	El GRUB es gestor de arranque, que permite cargar el kernel y el sistema.
+
+	Archivos de configuración
+		En la carpeta /etc/grub.d vemos los archivos del grub.
+		/boot/grub/grub.cfg es el archivo de configuración, pero no modifiques este archivo, para configurarlo usa /etc/grub.d
+
+	El grub se coloca en el MBR, que esta en los primeros 512 Bytes del disco.
+	Backup del MBR
+
+	Podemos generar un backgrup del MBR con dd
+		>> dd if=/dev/dvda of=/root/mbr_backup bs=512 count=1
+
+	Actualizar grub
+		update-grub2
+
+	Instalar grub
+		grub-install /dev/xvdf
