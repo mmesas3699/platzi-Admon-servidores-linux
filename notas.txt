@@ -352,6 +352,7 @@ Formateo y montaje de particiones en Linux
  			>> mkdir xvdf3
 			>> mount /dev/xvdf1 /tmp/xvdf1
 			>> mount /dev/xvdf3 /tmp/xvdf3
+					 [disco]    [carpeta a montar]
 
 	Desmontar una partición
 		Para poder desmontar una partición, debes no estar sobre la partición. Puedes ejecutar el comando:
@@ -475,3 +476,195 @@ Administrar el arranque del sistema GRUB
 
 	Instalar grub
 		grub-install /dev/xvdf
+
+
+Administrar discos duros con LVM
+		
+	Permite agregar, sin importar los discos que se tengan, agragar más discos en tiempo de ejecución.
+
+	>> apt-get install lvm2
+
+	Una forma grafica de entender como funciona LVM
+
+		 ________	 ________	 ________    ________
+		|		 |  |        |  |        |  |        |
+		|volumen |	|volumen |  |volumen |  |volumen |
+		| fisico |	|fisico  |  |fisico  |  |fisico  |
+		|________|	|________|  |________|  |________|
+
+      __________________________________________________
+     |                                                  |  
+     |                 volume group                     |   
+	 |   ________    ________    ________    ________   |
+	 |	|		 |  |        |  |        |  |        |  |
+	 |	|volumen |	|volumen |  |volumen |  |volumen |  |
+	 |	| fisico |	|fisico  |  |fisico  |  |fisico  |  |
+	 |	|________|	|________|  |________|  |________|  |
+     |__________________________________________________|
+
+      ___________________________________________________
+	 |                 |                                 |    
+     |               vo|lume group                       |
+	 |   ________    __|______    ________    ________   |
+	 |	|		 |  |  |      |  |        |  |        |  |
+	 |	|volumen |	|vo|lumen |  |volumen |  |volumen |  |
+	 |	| fisico |	|fi|sico  |  |fisico  |  |fisico  |  |
+	 |	|________|	|__|______|  |________|  |________|  |
+     |                 |                                 |
+	 | volumen         |        volumen                  |
+     | logico 1        |        logico 2                 | 
+     |_________________|_________________________________|
+
+
+		- Volumen fisico - Physical Volumes (PV): discos fisicos, particiones, volumenes RAID
+		- Grupos - Volume Groups (VG): contiene 1 o mas volumenes fisicos, se redimenciona agregando o quitando 
+		  volumenes fisicos
+		- Volumen logico - Logical Volumes (LV): divide los grupos, se redimenciona en “caliente”
+
+	Crear volumenes fisicos:
+
+		1. Agregar discos fisicos y darles tipo LVM: con fdisk [8e]
+		2. Agregar la partición a los volumenes físicos del LVM:
+			>> pvcreate /dev/[nombre partición]
+		3. Listar los discos LVM existentes
+
+		** >> pvremove [/dev/nombre disco / partición]
+			## para remover un disco o partición LVM
+
+	Crear un grupo:
+
+		{ 
+			En el ejercicio tengo 2 discos cada uno de 10GB:
+				- Hago una particion del primer disco de 5GB
+				- Agrego a LVM la particion que cree más el segundo disco completo.
+				- Es como si ahora tuviera un disco de 15GB
+		}
+
+		1. >> vgcreate [nombre del grupo] [disco o partición a usar]
+			## para agregar la particion a un grupo
+
+			** >> pvscan 
+				## para listar las particiones que estan agregadas en los volumenes fisicos del LVM.
+
+			** >> pvs 
+				## lista los volumenes logicos
+
+		2. >> vgextend [nombre del grupo] [disco o partición]
+			## agregar más particiones a un grupo
+
+		3. >> vgreduce [nombre grupo] [nombre del volumen]
+			## retira el volumen del grupo
+
+			** >> vgdisplay
+				## lista y detalla los grupos existentes
+
+			** >> vgs
+				## lista los grupos existentes
+
+	Volumenes logicos:
+
+		1. lvcreate -n [nombre del volumen logico] -L [tamaño]g [nombre del grupo]		
+			## crea un volumen logico
+
+		** >> lvs
+			## lista los volumenes logicos
+
+		** >> mkfs.ext4 /dev/[nombre grupo]/[nombre volumen logico]
+			## Para dar formato al volumen logico
+
+		2. lvextedn +L[tamaño]G dev/[nombre grupo]/[volumen logioco]
+			## para extender el tamaño del volumen logico ESTO ES POSIBLE EN CALIENTE
+
+		3. Luego de extender el tamaño del volume logico hay que ejecutar lo siguiente para que come los cambios:
+
+			>> resize2fs /dev/[nombre grupo]/[volumen logico]
+
+
+Apagar servidores de forma remota
+	
+	Antes de apagar un servidor tener en cuenta:
+
+		1. Revisar en cual servidor esta conectado.
+		2. Linux no pregunta confirmaciones.
+		3. Es diferente apagar y reiniciar.
+
+	Reinicar:
+
+		>> shutdown -r now
+					-r == reiniciar, now == ahora
+
+		>> systemctl reboot
+
+	Apagar:
+
+		>> systemctl poweroff
+
+
+Arrancando el sistema runlevels, systemd
+
+	{
+		Esto es como los servicio de windows para que esta arriba y que abajo
+	}
+	
+	Todo sisema linux tiene cierta forma de arrancar, lo importante son los niveles donde se estan ejecutando las
+	cosas.
+
+		Existen 6 niveles de servicio por defecto:
+			1. Modo usuario.
+			2. Modo multiusuario - soporte sin red.
+			3. Modo multiusuario - con soporte de red.
+			4. 
+			5. Interfaz grafica.
+			6. Reinicio
+
+		** Estos niveles se pueden ver en: /etc/rc0.d - rc1.d ...... - rc6.d
+			Estas carpetas contienen diferentes scripts que son los que se ejecutan dependiendo del proceso 
+			que se este realizando: Arranque o Cierre.
+
+			** Ejemplo: 
+				>> ls /etc/rc1.d
+
+				K01atd
+				K01killprocs
+                S02single
+				S01killproc
+
+			  Donde la S (start) en arranque, osea se ejecuta cuando el sistema arranca y K (kill) cuando el sistema esta cerrando,
+			  los números que siguen a la letra inicial representa el orden en que se ejecutan estos scripts.
+
+	** >> runlevel
+		Muestra en que nivel se estan ejecutando los procesos.
+
+	** >> systemctl
+		## Permite saber un arbol de procesos, indicando las dependencias de estos. Como los servicios de windows.
+
+	** >> systemctl list-dependencies [nombre servicio]
+		## para la lista de dependencias del servicio.
+
+	** >> systemctl show [servicio]
+		## ver un servicio
+
+	** >> systemctl cat [servicio]
+		## se puede ver donde esta arrancando y cual es el script que usa el servicio
+
+	** >> ps aux | grep [sevicio]
+		## muestra los procesos que estan corriendo para el servicio
+
+	** >> systemctl status [servicio]
+		## muestra el estado del servicio
+
+	Cuando mato el proceso de Mysql el servicio se levanta inmediatamente. Esto es porque el archivo de
+	configuración (para saber el archivo *systemctl cat [servicio]*) contiene, para este caso, en la 
+	sección SERVICE la opcion RESTART=on-failure, que es reiniciar en caso de falla.
+
+	** >> systemctl deamon-reload
+		## si hago cambios en los archivos de configuración de arranque de algún servicio debo recargar para
+			tomar los cambios. Para eso este comando.
+
+	** >> systemctl restart [servicio]
+		## para reiniciar un servicio
+
+	
+
+
+
