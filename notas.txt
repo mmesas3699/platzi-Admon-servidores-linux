@@ -665,6 +665,94 @@ Arrancando el sistema runlevels, systemd
 		## para reiniciar un servicio
 
 	
+Uso de variables de entorno, bashrc, profile
+
+	Las variables de entorno permiten configurar diferentes ambientes como desarrollo o producción,
+	tambien llaves de seguridad.
+
+	## Para crear una variable de entorno, en la terminal:
+		>> [NOMBRE VARIABLE]=['valor']
+
+	## imprimir la variable
+		>> echo $[nombre de la variable]
+
+	## Listar las variables de la sesión actual
+		>> export
+
+
+	- La variable PATH contiene las rutas de los binarios
+
+	En el archivo .bashrc se pueden guardar variables para el usuario que esta logueado y que no desaparezcan 
+	en cuanto se reinicia el sistema.
+
+	El archivo .profile que afecta al bash profile
+
+	El archivo /etc/profile afecta a todos los usuarios
+		Para insertar una variable de entorno agregar el archivo de arriba:
+
+			>> export [NOMBRE DE LA VARIBLE]=[valor de la variable]
+
+	/etc/bash.bashrc” para editar y agregar variables de entorno para todos los usuarios.
+
+
+
+Uso de redireccionamiento y pipes para logs.
+
+	Una tarea comun de un administrador de servidores es leer logs.
+
+	Algunas herramientas para tener en cuenta a la hora de leer logs:
+
+		** encuentro los logs en /var/log
+		1. less [nombre del archivo]
+		2. more [nombre del archivo]
+		3. grep -r "25/Nov" ## filtrar información. Busca los del 25 de nov en todos los archivos.
+		4. wc [nombre archivo]  ## contar lineas.
+		5. gawk  ## separa el archivo por columnas.
+		6. '>' que permite escribir el resultado de un comando en un archivo (pip freeze > requeriments.txt)
+			tambien se puede usar >> para que no sobre escriba si no que agregue.
+		7. head [nombre archivo]	## muestra el inicio de un archivo.
+		8. tail [nombre archivo]	## muestra el final de un archivo.
+			tail -f [nombre archivo]	## muestra el final del archivo en tiempo real
+
+		** tail -f /var/log/syslog
+			## muestra la información del servidor, que esa haciendo, como se esta conectando.
+
+
+Monitorear, eliminar y establecer prioridades en procesos
+
+	Los procesos permiten al sistema operativo trabajar, definiendo cuando se debe procesar información.
+
+	Los procesos en Linux están encapsulados, esto quiere decir que el usuario que lanzó el proceso es quien lo
+	debe quitar.
+
+	>> ps aux 			## Permite los procesos que se están ejecutando
+
+	>> ps aux | grep mysql 		## hace un pipe para filtrar todo lo que contenga mysql
+
+	** Cuando se ejecute un proceso es mejor hacerlo con un usuario que no sea el root, con esto se encapsulan los 
+	procesos y si llegase haber un ataque solo se veria afectado este usuario y no el sistema completo.
+
+	>> htop		## Para ver los procesos de una mejor forma
+
+		load average [cantidad de procesos ejecutados en el ultimo minuto] [ultimos 5 min] [ultimos 15 min]
+			## El primer numero representa las cpu's que se están usando este número nunca debe ser mayor al
+			total de cpu del pc
+
+	>> ps tree 		## para ver el arbol de procesos
+			
+	>> kill -9 [PID]  ## kill para matar un proceso -9 para hacerlo sin importar que
+			-15 para cerrar un proceso de forma correcta
+
+	Todos los procesos tienen una prioridad: se conoce con 'nice', estos tienen un valor entre -20 y 19, donde
+	-20 es el de mayor prioridad.
+
+	Dentro de htop se puede modificar el nice
+
+	>> nice 	## para modificar el nice
+
+	
+
+
 
 
 
