@@ -752,7 +752,63 @@ Monitorear, eliminar y establecer prioridades en procesos
 
 	
 
+Enlaces duros, simbólicos y sistemas de backups
+
+	** >> du -sh * 		## muestra en orden ascendente el tamaño de los archivos y directorios dentro del que me encuentre
+	
+	- Enlace simbólico: es como un acceso directo (un archivo sin datos, que solo contiene una referencia a la ubicación del 
+		archivo original)
+
+		>> ls -s [ruta directorio padre (puede ser un archivo)] [ruta directorio simbolico (se puede cambiar el nombre del archivo)] 
+			** si modifico el archivo desde el enlace se modifican los dos
+
+	- Enlace duro: apuntan fisicamente al mismo archivo en el nodo del disco duro
+		>> ln [ruta padre] [ruta hijo]
+
+		** solo se pueden de archivos no directorios
+		** sirve para backups si se borra el archivo del padre queda el del hijo
 
 
+*****
+apt-get install tree
 
+## para ver el arbol de directorios
+
+*****
+
+
+Manejo de usuarios y grupos
+
+	Linux es un sistema multiusuario, cada usuario puede correr con diferentes configuracion, permisos, etc.
+
+	>> adduser [nombre del usuario]
+		## para crear un usuario, este programa usa 'useradd' que es el programa por defecto, adduser nos da más ventajas.
+
+	>> su - [usuario] 
+		## para cambiar de usuario
+
+	>> groups
+		## muestra los grupos a los que pertenece el usuario loggeado
+
+	>> addgroup [usuario] [grupo]
+		## para añadir a un grupo el usuario. Para que tome los cambios debe reiniciar sesión.
+
+	>> delgroup [usuario] [grupo]
+		## para sacar de un grupo a un usuario
+
+	>> whoami
+		## para ver el usuario actual
+
+	>> deluser [usuario]
+		## Para eliminar usuarios
+
+	>> passwd [usuario]
+		## para cambiar la contraseña de un usuario
+
+	** En /etc/passwd están todos los usuarios del sistema.
+	** En /etc/group están todos los grupos del sistema.
+	** En /etc/shadow están todas las contraseñas de los usuarios. ## editando este archivo se pueden deshabilitar las contraseñas de
+		los usurios
+
+	
 
