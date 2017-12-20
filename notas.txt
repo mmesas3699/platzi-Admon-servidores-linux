@@ -866,4 +866,261 @@ Seguridad del kernel
 
  Permisos de archivos
 
- 
+ 	Los permisos nos permiten controlar la seguridad de acceso a cada archivo o directorio del sistema. Permiten ver de que usuario
+ 	vienen y que usuario puede hacer que dentro de ese archivo o directorio.
+
+ 	>> ls -l 	## para ver los permisos
+
+ 		-rw-rw-r		## el primero son los permisos del usuario, el siguiente los del grupo, y el último los de los demas usuarios 
+ 						   del sistema.
+
+
+ 	>> chmod [bloque][+ o -][permiso] [archivo o directorio]
+ 		## Permite cambiar los permisos. El parámetro [bloque] define si es el usuario, el grupo o los otros usuarios.
+ 		   Los parámetros [+ o -] para agregar o eliminar (a lo que ya tiene). El parámetro [permiso] si es de lectura (read),
+ 		   escritura (write) o ejecución (execution).
+
+
+ 	>> chmod 755 [archivo o directorio]
+ 	   ## Permite cambiar los permisos. Lectura (read) tiene un valor de 4, escritura (write) un valor de 2 y ejecución (execution)
+ 	      un valor de 1, la sumatoria entre todos esos da 7, es lo mismo que decir (cada digito representa: usuario, grupo, otros):
+
+ 	       	>> chmod o+rwx [archivo]
+
+ 	>> chmod u=rwx,g=,o= [archivo o directorio]
+ 	   ## Permite cambiar los permisos. Usuario tiene permiso de lectura, escritura y ejecución, el grupo no tiene ningún permiso y 
+ 	      los otros usuarios tampoco.
+
+
+****************
+Para ejecutar scripts desde un archivo este debe ser .sh y debe tener la estructura:
+
+#!/bin/sh
+
+cuerpo del script
+
+****************
+
+	** los archivos que están dentro de la carpeta /tmp solo se pueden borrar por el dueño del archivo, esto porque esta carpeta tiene 
+		un sticky, que es una 't' al final cuando se ejecuta ls -l
+
+	- Cambiar propietario de un archivo:
+
+		>> sudo chown [usuario nuevo dueño]:[grupo] [archivo]
+			## con ':' cambia automaticamente el grupo si este cambia solo el usuario
+
+
+Configuración de red
+
+	Ver la configuración de interfaces de red
+		>> ifconfig
+
+	Inicializar la interfaz
+		>> dhclient eth1
+
+	Archivos de configuración
+		/etc/network/interfaces
+		/etc/network/interfaces.d
+
+	Activar DHCP automatico
+		En el archivo interfaces.d agregamos la línea:
+
+			iface eth1 inet dhcp
+
+	Apagar inferface de red
+		>> ifdown eth0
+
+	Multiples ip sobre una misma interface
+ 		>> ifconfig eth0:0 192.168.10.5
+
+	Comando ip: Con este comando podemos sustituir ifconfig
+
+		>> ip addr show, mostar las direcciones
+
+	Enrutamiento
+		Para ver la tabla de enrutamiento se puedes usar route -n
+
+
+
+Como manejar mi firewall
+	
+	Ver reglas de IPTABLES de forma mas clara
+		>> iptables -nL
+
+		input: los paquetes que entran
+		output: paquetes que salen
+		forward: paquetes que llegan y se redireccionan
+
+	Configurar acceso a todas los paquetes, de añadir una regla seria para bloquear o condicionar alguna conexión.
+		>> iptables -P INPUT ACCEPT
+
+	Bloquea acceso a todas los paquetes, de añadir una regla seria para permitir o condicionar alguna conexión.
+		>> iptables -P INPUT DROP
+
+	Permitir acceso a paquetes desde un puerto especifico (puerto 22)
+		>> iptables -A INPUT -p tcp --dport 22 -j ACCEPT
+
+	Permitir acceso a paquetes desde la red LOCAL (todas las ip privadas)
+		>> iptables -A INPUT -s 192.168.0.1/24 -j ACCEPT
+
+	Regla para que entren los paquetes a través de conexiones establecidas o relacionadas (como por ejemplo, HTTP).
+		>> iptables -A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
+
+	Borrar alguna regla especifica
+		>> iptables -D INPUT [Numero de la regla]
+
+	Borrar todas las reglas
+		>> iptables -F
+
+	Respaldar reglas de iptables
+		>> iptables-save > /etc/iptables.rules
+
+	Restaurar las reglas de ip tables
+		>> iptables-restore < /etc/iptables.rules
+
+
+Manejo de DNS y dig
+
+	El DNS permite mapear un nombre a una dirección IP
+
+	** El archivo /etc/hosts contiene una lista de ip y nombres asignados. 
+
+		[ip] [dominio]
+
+		Entonces cuando yo coloque un dominio en mi pc me va a dirigir a la ip que tenga en el archivo hosts
+
+	Los distintos tipos de DNS son:
+
+		A - IPv4
+		CNAME - nombre
+		MX - correo
+		AAAA - dirección IPv6
+		TXT - texto
+		PTR - dns reverso
+
+	Consultar dominios
+		>> apt-get install dnsutils
+
+		>> dig linux.platzi.com a dns oficiales
+		>> dig linux.platzi.com @[servidor dns] a un servidor especifico
+
+
+Instalación de NTP
+
+	NTP es un servicio que permite sincronizar la hora.
+
+	Instalación
+		>> apt-get install ntp
+
+	Consultas
+		>> ntpq permite hacer consultas al servicio
+
+	Activar
+		>> ntpdate-debian selecciona un servidor y hace la configuración.
+
+	Archivo de configuración
+		/etc/default/ntpdate
+
+	Mantener la hora sincronizada sirve para mantener los logs del sistema actualizados. Un atacante puede modificar la fecha del
+	sistema, dañar el sistema, y volver a colocar la hora actual, cuando esto pasa no hay forma de saber la hora real del ataque.
+
+
+
+Auditoria de login y logs
+
+	>> who 	## muestra los usuarios conectados
+	>> w 	##quién está conectado y hace cuanto estan inactivos
+	>> tail -f /var/log/auth  ## queda registrado todos los intentos de acceso
+
+
+
+Tuneles con ssh, autossh, y socat
+
+	Abrir un túnel en el servidor
+		>> ssh -Ng -L9898:localhost:80 -i platzi
+
+	Aceder a la máquina local
+		>> ssh -NR 10022:localhost:22 -i platzi
+		>> ssh -p 10022 usuario@localhost
+
+	Crear proxi
+		>> ssh -N -D10090 platzi
+
+
+Backup de archivos de configuración con etckeeper
+	
+	Cuando mantenemos un gran sistema necesitamos tener auditoria de las acciones en el servidor.
+
+	- backup de etc/
+		** Con etckeeper podemos guardar la configuraciones de etc, usando git. Instala git dentro /etc y hace un commit inicial
+		
+		Instalación:
+			>> apt-get install etckeeper
+		
+		Guardar cambios:
+			>> etckeeper commit 		## para acturalizar los cambios que se ha hecho sobre /etc
+
+
+	** tig
+		>> apt-get install tig			## ejecutar 'tig' sobre un directorio con git y permite ver los commits
+
+
+Prevenir ataque con 'fail2ban'
+
+	Muchas veces los servidores están expuestos a ataques, fail2ban nos permite bloquear ataques.
+
+	Instalación
+		>> apt-get install fail2ban
+
+
+	Los archivos de configuración son:
+		/etc/fail2ban/fail2ban.conf
+		/etc/fail2ban/jail.conf
+
+	Filtros
+		Para activar un filtro lo debes buscar y añadir la línea enabled = true, por ejemplo en nginx debes buscar el archivo
+			etc/fail2ban/filter.d/nginx-http-auth.conf
+	
+	Restaurar el servicio
+		>> fail2ban.service restart
+			## despues de realizar un cambio en los filtros
+
+
+
+Encriptación de datos
+
+	'gpg' es un programa que maneja una serie de configuraciones para encriptación.
+
+	Existe 2 tipos de encriptación:
+		Simetrica: con la contraseña que encripto desencripto.
+		Asimetrica: Como ssh que utiliza dos llaves una publica y una privada, con la publica se encripta y con la privada se 
+					desencripta.
+
+	## Para encriptar
+		>> gpg -ca -o [archio de salida] [archivo a encriptar]
+
+	## para desencriptar
+		>> gpg -d [archivo]
+
+
+
+Encontrar el dueño del paquete
+		
+	Para encontrar el dueño de un archivo podemos el comando
+	 	>> dpkg -S [nombre del archivo]
+
+	Para ver todos los archivos de un programa
+		>> dpkg -l [nombre del paquete]
+
+
+md5sum, integridad de archivos y paquetes
+		
+	md5sum permite sacar una suma binaria de un archivo con un hash y esto verifica si el archivo fue modificado	
+
+	Calcular m5sum
+		>> md5sum [nombre del archivo]
+
+
+Como podemos monitorear servidores 
+
+	
