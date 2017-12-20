@@ -807,8 +807,63 @@ Manejo de usuarios y grupos
 
 	** En /etc/passwd están todos los usuarios del sistema.
 	** En /etc/group están todos los grupos del sistema.
-	** En /etc/shadow están todas las contraseñas de los usuarios. ## editando este archivo se pueden deshabilitar las contraseñas de
-		los usurios
+	** En /etc/shadow están todas las contraseñas de los usuarios. ## editando este archivo se pueden deshabilitar
+	   las contraseñas de los usurios
 
+
+Generar backup de bases de datos
 	
+	Existen muchas formas de generar un backup, en este video veremos algunas de las formas:
+    	- En amazon puedes generar una imagen de la instancia en la que estás trabajando.
 
+	- Generar un backup de la base de datos:
+	>> pg_dump [base de datos ] > backup.2017.sql
+
+	- Restaurar una base de datos
+	>> psql[base de datos ] < backup.2017.sql
+
+	Es una buena práctica nombrar el archivo con el nombre de la base de datos y la fecha.
+
+
+
+Uso de socat y manejo de redireccionamiento de puertos
+
+	Socat sirve para redireccionar el trafico entre puertos.
+
+	## instalar socat
+	>> apt-get install socat
+
+	- Crear redireccionamiento:
+	>> socat TCP-LISTEN:8080, fork, reuseaddr TCP:localhost:80
+		## Redirecciona todo el tráfico del puerto 8080 al 80
+
+	- Redirección UDP:
+	>> socat UDP-LISTEN:80,reuseaddr,fork TCP4:localhost:8080	
+
+
+Tareas programadas y como monitorearlas
+
+	crontab: ver las notas del curso de terminal
+
+	** en la carpeta /etc/cron.d  se pueden añadir scripts para que se ejecuten cada cierto tiempo
+
+
+Seguridad del kernel
+
+	Es la pieza fundamental del sistema, el interactua entre el hardware y los programas que se ejecutan.
+
+	** Modificar limites
+	>> vim/nano /etc/security/limits.conf 	## en este archivo se encuentran los limites del kernel
+
+	soft  nofile  32000
+  	hard  nofile  35000  
+
+  	De esta forma estamos estableciendo la cantidad de archivos que puede abrir el sistema al tiempo
+
+  	** sysctl -p  ## para aplicar los cambios realizados
+
+
+
+ Permisos de archivos
+
+ 
